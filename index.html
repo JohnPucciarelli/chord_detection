@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>HTML5 Chord Detection Experiment</title>
+<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+</head>
+<style type="text/css">
+
+	html, body {
+		width: 100%;
+	}
+
+	.container {
+		width: 60%;
+		margin: 0 auto;
+	}
+
+</style>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/chord_detection.js"></script>
+<script>
+
+	$(function() {
+
+		var chordDetect = new ChordDetect();
+		chordDetect.listen();
+
+	});
+
+</script>
+<body>
+	<div class="container">
+		<div class="page-header">
+			<h1>HTML5 Chord Detection Experiment v0.1</h1>
+		</div>
+	</div>
+</body>
+</html>
+
