@@ -28,15 +28,16 @@ var ChordDetect = ( function(options) {
 	
 		if (_context) {
 
-			_volume = _context.createGainNode();
+			var gainNode = _context.createGainNode();
+			_volume = gainNode.gain;
 			_volume.value = _defaults.volume;
 
 			navigator.webkitGetUserMedia( { audio: true }, function(stream) {
 
 				_microphone = _context.createMediaStreamSource(stream);
-				_microphone.connect(_volume);
+				_microphone.connect(gainNode);
 
-				_volume.connect(_context.destination);
+				gainNode.connect(_context.destination);
 
 			 },  _error('failed to get user media.') );
 			
@@ -44,22 +45,25 @@ var ChordDetect = ( function(options) {
 
 	};
 
+	// set volume 0.0 - 1.0
 	_cd.setVolume = function(vol) {
 
-		if (vol > 0.9) vol = 0.9;
+		if (vol > 1.0) vol = 1.0;
 		if (vol < 0.0) vol = 0.0;
+		_volume.value = vol;
+		console.log("changed volume: " + _volume.value);
 
 	};
 
-	_cd.volume_up = function() {
+	_cd.volumeUp = function() {
 
-		_cd.setVolume(volume + 0.1);
+		_cd.setVolume(_volume.value + 0.1);
 
 	};
 
-	_cd.volume_down = function() {
+	_cd.volumeDown = function() {
 
-		_cd.setVolume(volume - 0.1);
+		_cd.setVolume(_volume.value - 0.1);
 
 	};
 
