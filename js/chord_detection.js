@@ -1,13 +1,16 @@
-var ChordDetect = ( function(options) {
+var ChordDetect = function(options) {
 
 	var _cd = {};
 
 	var _context;
+	var _analyser;
 	var _microphone;
 	var _volume;
 
 	var _defaults = {
-		volume: 0.3
+		volume: 0.0,
+		fftSize: 1024,
+		smoothing: 0
 	};
 
 	var _attrs = _.defaults(options, _defaults);
@@ -28,19 +31,74 @@ var ChordDetect = ( function(options) {
 	
 		if (_context) {
 
+			_analyser = _context.createAnalyser();
+			_analyser.smoothingTimeConstant = _attrs.smoothing;
+			_analyser.fftSize = _attrs.fftSize;
+			
 			var gainNode = _context.createGainNode();
 			_volume = gainNode.gain;
-			_volume.value = _defaults.volume;
+			_cd.setVolume(_attrs.volume);
 
 			navigator.webkitGetUserMedia( { audio: true }, function(stream) {
 
 				_microphone = _context.createMediaStreamSource(stream);
-				_microphone.connect(gainNode);
+				_microphone.connect(_analyser);
 
+				_analyser.connect(gainNode);
 				gainNode.connect(_context.destination);
+
+				_cd.animate();
 
 			 },  _error('failed to get user media.') );
 			
+		}
+
+	};
+
+	_cd.animate = function() {
+
+		var canvas = document.getElementById('canvas');
+
+		if (canvas.getContext) {
+
+			var context = canvas.getContext('2d');
+						
+			var requestAnimationFrame = window.requestAnimationFrame ||
+				window.webkitRequestAnimationFrame ||
+				window.mozRequestAnimationFrame ||
+				window.msRequestAnimationFrame ||
+				window.oRequestAnimationFrame ||
+				function(callback) {
+					return setTimeout(callback, 1);
+			};
+
+			var draw = function() {
+
+				context.fillStyle = 'rgba(255, 255, 255, 0.01)';
+				context.beginPath();
+				context.rect(0, 0, canvas.width, canvas.height);
+				context.fill();
+				//context.clearRect(0, 0, canvas.width, canvas.height);
+				context.fillStyle = 'rgb(' + Math.floor(Math.random() * 256) + ', ' + Math.floor(Math.random() * 256) + ', ' + Math.floor(Math.random() * 256) + ')';
+
+				var blockWidth = canvas.width / (_attrs.fftSize / 2);
+				var blockHeight = canvas.height / 256;
+
+				var frequencyArray = new Uint8Array(_analyser.frequencyBinCount);
+				_analyser.getByteFrequencyData(frequencyArray);
+
+				for (var i = 0; i < frequencyArray.length; i++) {
+					context.beginPath();
+					context.rect(i * blockWidth, canvas.height, blockWidth, -1 * frequencyArray[i] * blockHeight); 
+					context.fill();
+				}
+
+			requestAnimationFrame(draw);
+
+			};
+
+			draw();
+
 		}
 
 	};
@@ -67,6 +125,10 @@ var ChordDetect = ( function(options) {
 
 	};
 
+	_cd.getVolume = function() {
+		return _volume.value;
+	};
+
 	return _cd;
 
-}({}) );
+};

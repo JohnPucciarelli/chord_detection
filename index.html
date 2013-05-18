@@ -25,14 +25,17 @@
 
 	$(function() {
 
-		ChordDetect.listen();
-		
+		var chordDetect = new ChordDetect({ volume: 0.0, fftSize: 512, smoothing: 0.3 });
+		chordDetect.listen();
+
 		$('.volume_knob').knob({
 			'change':  function(vol) {
-					vol = vol == 0 ? 0 : vol / 100; 	// convert 0 - 100 to 0.0 to 1.0
-					ChordDetect.setVolume(vol);
-				}
-			});	
+				vol = vol == 0 ? 0 : vol / 100; 	// convert 0 - 100 to 0.0 to 1.0
+				chordDetect.setVolume(vol);
+			}
+		});
+
+		$('.volume_knob').val(chordDetect.getVolume() * 100).trigger('change');	
 
 	});
 
@@ -41,6 +44,9 @@
 	<div class="container">
 		<div class="page-header">
 			<h1>HTML5 Chord Detection Experiment v0.1</h1>
+		</div>
+		<div class="span12">
+			<canvas id="canvas" width="650" height="300">Your browser does not support canvas.</canvas>
 		</div>
 		<input type="text" class="volume_knob" style="box-shadow: none;" data-width="100" data-fgColor="#66CC66" data-angleOffset="-125" data-angleArc="250" />
 	</div>
