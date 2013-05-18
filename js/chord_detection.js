@@ -88,6 +88,10 @@ var ChordDetect = function(options) {
 				break;
 			}
 
+		} else {
+
+			_error('Failed to find canvas with id: ' + _attrs.canvasId);
+
 		}
 
 	};
@@ -114,7 +118,7 @@ var ChordDetect = function(options) {
 					_canvasContext.fill();
 				}
 
-			requestAnimationFrame(draw);
+				requestAnimationFrame(draw);
 
 			};
 
