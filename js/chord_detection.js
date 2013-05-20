@@ -153,7 +153,6 @@ var ChordDetect = function(options) {
 				
 			for (var i = 0; i < frequencyArray.length; i++) {
 				_canvasContext.fillStyle = colorScale(frequencyArray[i]).hex(); 
-				console.log(_canvasContext.fillStyle);
 				_canvasContext.fillRect(canvas.width - blockWidth, canvas.height - i * blockHeight, blockWidth, blockHeight);
 			}
 
