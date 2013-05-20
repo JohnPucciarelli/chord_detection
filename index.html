@@ -20,12 +20,13 @@
 <script src="js/jquery.knob.js"></script>
 <script src="js/underscore.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="js/chroma.min.js"></script>
 <script src="js/chord_detection.js"></script>
 <script>
 
 	$(function() {
 
-		var chordDetect = new ChordDetect({ volume: 0.0, fftSize: 512, smoothing: 0.3 });
+		var chordDetect = new ChordDetect({ mode: 'spectrogram', volume: 0.0, fftSize: 512, smoothing: 0.3 });
 		chordDetect.listen();
 
 		$('.volume_knob').knob({

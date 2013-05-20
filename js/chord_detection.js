@@ -9,6 +9,10 @@ var ChordDetect = function(options) {
 	var _canvas;
 	var _canvasContext;
 
+	var _startAnimation;
+	var _animateSpectrum;
+	var _animateSpectrogram
+
 	var _defaults = {
 		volume: 0.0,
 		fftSize: 1024,
@@ -51,7 +55,7 @@ var ChordDetect = function(options) {
 				_analyser.connect(gainNode);
 				gainNode.connect(_audio.destination);
 
-				_cd.startAnimation(_attrs.mode);
+				_startAnimation(_attrs.mode);
 
 			 },  _error('failed to get user media.') );
 			
@@ -59,7 +63,7 @@ var ChordDetect = function(options) {
 
 	};
 
-	_cd.startAnimation = function(mode) {
+	var _startAnimation = function(mode) {
 
 		_canvas = document.getElementById(_attrs.canvasId);
 
@@ -79,12 +83,12 @@ var ChordDetect = function(options) {
 			switch (mode) {
 
 				case 'spectrum':
-					_cd.animateSpectrum();
+					_animateSpectrum();
 				break;
 
 				case 'spectrogram':
 				default:
-					_cd.animateSpectrogram();
+					_animateSpectrogram();
 				break;
 			}
 
@@ -96,7 +100,7 @@ var ChordDetect = function(options) {
 
 	};
 
-	_cd.animateSpectrum = function() {
+	_animateSpectrum = function() {
 
 			var draw = function() {
 
@@ -118,13 +122,52 @@ var ChordDetect = function(options) {
 					_canvasContext.fill();
 				}
 
-				requestAnimationFrame(draw);
+				_requestAnimationFrame(draw);
 
 			};
 
 			draw();
 
 	};
+
+	_animateSpectrogram = function() {
+
+		var tempCanvas = document.createElement('canvas');
+		var tempContext = tempCanvas.getContext('2d');
+
+		var colorScale = chroma.scales.hot().domain([0, 255]); 
+
+		var blockWidth = canvas.width / (_attrs.fftSize / 2);
+		var blockHeight = canvas.height / 256;
+
+		tempCanvas.width = _canvas.width;
+		tempCanvas.height =  _canvas.height;
+
+		var draw = function() {
+
+			var frequencyArray = new Uint8Array(_analyser.frequencyBinCount);
+			_analyser.getByteFrequencyData(frequencyArray);
+
+			// copy current canvas to tempCanvas
+			tempContext.drawImage(_canvas, 0, 0, canvas.width, canvas.height);
+				
+			for (var i = 0; i < frequencyArray.length; i++) {
+				_canvasContext.fillStyle = colorScale(frequencyArray[i]).hex(); 
+				console.log(_canvasContext.fillStyle);
+				_canvasContext.fillRect(canvas.width - blockWidth, canvas.height - i * blockHeight, blockWidth, blockHeight);
+			}
+
+			_canvasContext.translate(-1 * blockWidth, 0);
+			_canvasContext.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, _canvas.width, _canvas.height);
+			_canvasContext.setTransform(1, 0, 0, 1, 0, 0);
+
+			_requestAnimationFrame(draw);
+
+		};
+
+		draw();
+
+	}
 
 	// set volume 0.0 - 1.0
 	_cd.setVolume = function(vol) {
